@@ -2,5 +2,6 @@
     "presets": ["@babel/preset-env"]
 }
 
-//presets => babel을 위한 거대한 플러그인 세트같은 느낌? -> 여러종류가 있다 그중 가장유명한게 @babel/preset-env고 // babel공식문서에 해당설명있음
+//presets => babel을 위한 거대한 플러그인 세트같은 느낌? 
+//-> 여러종류가 있다 그중 가장유명한게 @babel/preset-env고 // babel공식문서에 해당설명있음
 //@babel/preset-env는 스마트하게 우리가 세세하게관리할필요없이 최신의js문법을 컴파일해준다

@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon --exec babel-node index.js"
+    "dev": "nodemon --exec babel-node src/server.js"
   },
   "license": "MIT",
   "bugs": {
