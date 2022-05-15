@@ -1,0 +1,25 @@
+extends base.pug
+include mixins/video
+//- 불러온 모오습
+
+block title 
+    title Wetube | #{pageTitle}
+//- base.pug가 content라는 block를 줬으니 거기를 커스텀해서 쓰면 되는거지
+block header 
+    h1 #{pageTitle}
+    //- same h1 #{pageTitle}
+    //- 근데 띄워쓰기 하면 안됨. 텍스트처럼인식함
+    //- 근데 통일성을위해서 난 #{}이렇게 할래.(변수라는게 확 보이니까)
+block content
+    h1 Welcome to Main Page!
+    each info in videos
+        +video(info)
+        //- iteration(반복) in pug => for in쓸때처럼 그느낌임
+        //- 파이썬마냥 들여쓰기로 코드블럭을 보네..
+        //- pug의 #{} 안에는 js문법 쓰는거 잊지말고!
+        //- 당연히 videos는 컨트롤러 부분에서 넘어오는 array여야겠지?
+    else
+        li not Video!
+        //- if else문이 아니다 each else다 (each의 아무것도 없으면 else로 넘어옴 => 퍼그의힘!)
+    input(placeholder="test")
+    button send

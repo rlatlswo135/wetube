@@ -1,0 +1,14 @@
+mixin video(info)
+    div
+        h4 #{info.title}
+        ul
+            li #{info.rating}/5.
+            li #{info.comments} commnets.
+            li #{info.createdAt} created.
+            li #{info.views} views.
+
+//- 들여쓰기 주의! Mixin과 div가 동일선상이면 안되지
+//- mixin은 partials에서 변수가 들어간 버전이라생각하자
+//- 그냥 js의 모듈함수라생각하자 => 당연히 import도 해야겠지?
+//- include로 불러오는거.
+//- react의 컴포넌트같은 느낌.

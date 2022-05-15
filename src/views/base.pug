@@ -1,0 +1,23 @@
+doctype html
+html(lang="ko")
+    head
+        link(rel="stylesheet" href="https://unpkg.com/mvp.css")
+        block title
+    body 
+        header 
+            block header
+            if user.login 
+                small Heloo #{user.userName}
+            nav 
+                ul
+                    li
+                        if user.login
+                            a(href="/logout") Logout 
+                        else
+                            a(href="/login") Login
+        main 
+            block content
+            //- block은 실리콘틀 같은느낌이다 => 내가알아서 모양잡고 쓰면된다는거
+            //- 결국 block가 있다는건. 다른 pug가 확장해서 그 블록을 커스텀할수 있다는얘기..
+            include partials/footer.pug
+            //- 모듈처럼 움직일수있네. scss랑 비슷한듯? => pug -> include(문서)
