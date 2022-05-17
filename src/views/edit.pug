@@ -1,0 +1,8 @@
+extends base.pug
+
+block header
+    h1 Edit Video : #{pageTitle}
+block content
+    form(method="post")
+        input(name="title",placeholder="New Video Title",required,value=video.title)
+        input(value="Save",type="submit")

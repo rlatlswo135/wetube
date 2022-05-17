@@ -1,4 +1,7 @@
 extends base.pug
 
 block content
-    h1 Watch -> video : ##{id}
+    h1 #{pageTitle}
+    //- videoRouter 어떻게 나눠져있나 보자
+    a(href=`${id}/edit`) Edit Video &rarr;
+    //- 절대경로 (/url) =>  반드시 이 경로에 / 상대경로(url) => 현재를 중심으로

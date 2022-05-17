@@ -1,20 +1,13 @@
 doctype html
 html(lang="ko")
     head
+        title Wetube | #{pageTitle}
         link(rel="stylesheet" href="https://unpkg.com/mvp.css")
-        block title
     body 
         header 
             block header
-            if user.login 
-                small Heloo #{user.userName}
-            nav 
-                ul
-                    li
-                        if user.login
-                            a(href="/logout") Logout 
-                        else
-                            a(href="/login") Login
+
+
         main 
             block content
             //- block은 실리콘틀 같은느낌이다 => 내가알아서 모양잡고 쓰면된다는거

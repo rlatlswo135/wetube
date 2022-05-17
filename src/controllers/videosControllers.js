@@ -1,67 +1,58 @@
+import videoModel from "../models/Video"
+
 const fakeUser = {
     userName:'kim',
     login:true
 }
 
-export function homepage(req,res){
-    const videos = [
-        {
-            title:"Video #1",
-            rating:3,
-            comments:50,
-            createdAt:'2015-05-03',
-            views:100
-        },
-        {
-            title:"Video #2",
-            rating:5,
-            comments:100,
-            createdAt:'2018-05-03',
-            views:130
-        },
-        {
-            title:'Video #3',
-            rating:1,
-            comments:10,
-            createdAt:'2012-05-03',
-            views:50
-        }
-    ]
-    // const videos = []
-    
+export async function homepage(req,res){
+    // model의 find메서드는 사용법이 2가지다, promise / callback 방식. 
+    // 생각해보면 app.listen도 리스닝상태가되면 콜백을 실행시키고.. fetch든 뭐던 다 그러네..
+    // 이것도 db에서 filter(1번째인자)에 해당되는 데이터를 찾으면 그러면(then) 그때 2번째 콜백을 실행할거다.
+    videoModel.find({},(err,find)=>{
+        console.log('error',err)
+        // 개쩌는 console.log (key:value형태로 보여줌)
+        console.log('result',find)
+    })
+    console.log('순서')
+    // 순서를 잘보자 js동잒때문에 '순서'가먼저 -> res.render가 그다음(미들웨어가 실행되는걸 보면 알수있음) -> 그다음  큐에서돌아온녀석(err,result)가보일거다
     return res.render("home",{
         pageTitle:"home",
         user:fakeUser,
-        videos
     })
-    /*
-    what is res.render? => express봐서 인자랑 다 보자
-    컨트롤러가 home.pug를 렌더하고있자너?
-    그럼 여기서 변수를 보내줘야겠지? => 2번째인자
-    사용하는 render페이지에서 봐보자 -> home.pug겠지?
-    => #{}안에 Js코드 쓰는데 그안에 변수로 들어가있는모습.
-    */
 }
-export function edit(req,res){
-    return res.send('videos -> edit')
+export function getEdit(req,res){
+    const {id} = req.params;
+    return res.render('edit',{
+        pageTitle:`edit video title -> ${video.title}`,
+    })
 }
 export function search(req,res){
     return res.send('videos -> search')
 }
 export function watch(req,res){
-    // const {id} = req.params;
-    // const numExec = new RegExp('\\d+','gi')
-    // const findNumber =id.match(numExec)
-    // if(!findNumber){
-    //     return res.send('video id is number')
-    // }
+    const {id} = req.params;
     return res.render("watch",{
         id:req.params.id,
+        pageTitle:`Watch ${video.title}`,
     })
 }
 export function remove(req,res){
     return res.send(`videos -> remove`)
 }
-export function upload(req,res){
-    return res.send(`videos -> upload`)
+
+export function getUpload(req,res){
+    return res.render("upload",{
+        pageTitle:'upload'
+    })
+}
+export function postUpload(req,res){
+    console.log(req.body)
+    return res.redirect('/')
+}
+
+export function postEdit(req,res){
+    const { id } = req.params
+    // console.log(req.get('content-type'))
+    return res.redirect(`/videos/${id}`)
 }
