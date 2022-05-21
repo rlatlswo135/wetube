@@ -3,12 +3,10 @@ include mixins/video
 //- 불러온 모오습
 
 block header 
-    h1 #{pageTitle}
     nav 
         ul
             li
                 div
-                    a(href="/videos/upload") Upload Video
                 if user.login
                     div
                         a(href="/logout") Logout 

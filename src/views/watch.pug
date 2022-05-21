@@ -1,7 +1,14 @@
 extends base.pug
 
+//- 실수말자 뭐 props도아니고. 그냥 넘기면 여기서 따로 안받아오고 바로쓰면된다 (video 데이터)
+
 block content
-    h1 #{pageTitle}
     //- videoRouter 어떻게 나눠져있나 보자
-    a(href=`${id}/edit`) Edit Video &rarr;
-    //- 절대경로 (/url) =>  반드시 이 경로에 / 상대경로(url) => 현재를 중심으로
+    p #{video.description}
+    small #{video.hashTags.join(' ')}
+    hr
+    div 
+        a(href=`${video.id}/edit`) Edit Video &rarr;
+        //- 절대경로 (/url) =>  반드시 이 경로에 / 상대경로(url) => 현재를 중심으로
+        //- 현재 기본라우터가 videos로 되있어서 /id/id/edit이 아니라
+        //- videos/id/edit으로 가는것 같다.

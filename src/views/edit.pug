@@ -1,8 +1,10 @@
 extends base.pug
 
 block header
-    h1 Edit Video : #{pageTitle}
+    h1 Edit Video &rarr; #{pageTitle}
 block content
     form(method="post")
-        input(name="title",placeholder="New Video Title",required,value=video.title)
+        input(name="title",placeholder="edit Title",value=`${video.title}`)
+        input(name="description",placeholder="edit Description",required value=`${video.description}`)
+        input(name="hashTags",placeholder="edit hashTags",required value=`${video.hashTags.map(tag => tag.slice(1)).join(',')}`)
         input(value="Save",type="submit")

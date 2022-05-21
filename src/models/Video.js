@@ -3,27 +3,30 @@ import mongoose from 'mongoose';
 
 
 const videoSchema = new mongoose.Schema({
-    title:String,
+    title:{
+        type:String,
+        required:true,
+        trim:true,
+        uppercase:true
+        // String.trim()은 js도 있는거고 양쪽의 공백을 제거해준다
+        // 요리할때 고기 트리밍하는거마냥
+    },
     description:String,
-    createAt:Date,
+    createAt:{type:Date,required:true,default:Date.now},
+    // default를 통해서 말그대로 default를설정해줄수 있는데
+    // 함수도 쓸수있다 하지만 호출을하진말고.
     hashTags:[
-        {type:String}
+        {type:String,required:true,trim:true}
+        // 해쉬태그가 필수인게 맞나?
     ],
     meta:{
-        views:Number,
-        rating:Number
+        views:{type:Number,default:0},
+        rating:{type:Number,default:0}
+        // 아무튼 이렇게 default를 설정하면 create할때 멍청하게 입력하지 않는부분까지
+        // 타이핑해서 데이터를 넣어줄 필요가 없겠지?
     }
     // what is meta data
 })
 
-// 데이터모델은 1번째가 upperCase인게 국룰이랜다.
 const videoModel = mongoose.model('Video',videoSchema)
 export default videoModel
-/*
-mongoose에 모든것은 스키마로부터 파생된다.
-
-모델의 인스턴스를 document라고 하고,
-그렇다면 Model은 document들의 클래스일꺼다.
-각 document는 스키마에 선언된 속성 + 동작을 가진녀석들이 될거다
-
-*/

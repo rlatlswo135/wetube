@@ -1,8 +1,11 @@
 extends base.pug
 
-block header
-    h1 Upload Video
 block content
     form(method="post")
-        input(name="upload",type="text",required)
-        input(type="submit",value="upload Video")
+        input(type="text" name="title" required placeholder="title")
+        input(type="text" name="description" required placeholder="description")
+        input(type="text" name="hashTags" required placeholder="hashTags with comma(,)")
+        input(type="submit" value="upload video") 
+
+        //- form의 메서드가 post니까 post요청으로 가는거다.
+        //- 헷갈리는거 ㄴㄴ해
