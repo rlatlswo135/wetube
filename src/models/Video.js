@@ -28,5 +28,28 @@ const videoSchema = new mongoose.Schema({
     // what is meta data
 })
 
+// 스키마레벨 .pre가 미들웨어인듯? -> 공식문서 봐보자
+videoSchema.pre('save',async function(){
+    /*
+    몽구스를 통해 db에 save를 하면('save'이벤트를 썻으니)
+    미들웨어니까 이 함수를 거쳐갈거다
+    그래서 아래의 콘솔로그가 띄워져서 보일거다
+    그리고 document의 this를 참조할수있으니 this는 우리가 save를 하기로한
+    document가 될거다 => 중간에 데이터를 바꿔서 저장할수 있다는거
+    */
+
+    this.hashTags = this.hashTags[0]
+    .split(',')
+    .map(word => word[0]==='#'?word:`#${word}`),
+
+    console.log('we excute save event',this)
+
+})
+/*
+공식문서참조. 몽구스의 미들웨어는 스키마레벨에서 지정되며
+미들웨어 콜백함수는 document의 this를 참조한다 -> 즉 화살표함수로 2번째 인자콜백을 넣으면
+안될거다 화살표함수의 this랑 일반함수의 this는 다르기때문에
+*/
+
 const videoModel = mongoose.model('Video',videoSchema)
 export default videoModel

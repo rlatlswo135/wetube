@@ -101,7 +101,10 @@ export async function postUpload(req,res){
         await videoModel.create({
             title,
             description,
-            hashTags:hashTags.split(',').map(word => `#${word}`),
+            hashTags
+            // hashTags.split(',').map(word => `#${word}`),
+            // 원래는 위에를 hashTags로 변환해서 저장하는데 그걸 몽구스 미들웨어단에서 해서 저장하는형식으로하면
+            // 좀더 cool한 방법이겠지? => Video.js에서 미들웨어부분(pre)참조
         })
         return res.redirect('/')
     }catch(err){
