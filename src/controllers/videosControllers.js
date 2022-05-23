@@ -1,4 +1,4 @@
-import videoModel from "../models/Video"
+import videoModel,{formatHashTags} from "../models/Video"
 
 const fakeUser = {
     userName:'kim',
@@ -49,7 +49,7 @@ export async function postEdit(req,res){
         await videoModel.findByIdAndUpdate(id,{
             title
             ,description,
-            hashTags:hashTags.split(',').map(word => word[0]==='#' ? word : `#${word}`)
+            hashTags:formatHashTags(hashTags)
         })
         /*
         우리가 new Model해서 나온 document를 save()하는 거를 create()하나로 퉁치면 편하듯이
