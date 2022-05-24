@@ -1,0 +1,17 @@
+extends base
+
+block content
+    div #{errMsg}
+    form(method="post")
+        input(type="text" required placeholder="user-name" name="userName")
+        input(type="text" required placeholder="email" name="email")
+        input(type="password" required placeholder="password" name="password")
+        input(type="password" required placeholder="password confirm" name="password2")
+        input(type="text" required placeholder="location" name="location")
+        input(type="submit" value="Join")
+        //- name이 있어야지 백엔드쪽에서 해당 데이터를 참조하지?
+        //- method가 포스트니까 쿼리가아닌 body에 데이ㅓㅌ를 보낼거다
+    hr
+    div 
+        span Already have an account? 
+        a(href="/login") Login now &rarr;

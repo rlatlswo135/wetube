@@ -7,16 +7,15 @@ const fakeUser = {
 
 export async function homepage(req,res){
     try{
-        const videos = await videoModel.find({})
-        // 다시 말하지만 await이 해당 collection에서 데이터를 찾는걸 완료시까지
-        // 기다려주니까 가능한 순서의 코드블럭이다
+        const videos = await videoModel.find({}).sort({createAt:"desc"})
+        console.log(videos)
         return res.render("home",{
             pageTitle:"home",
             user:fakeUser,
             videos
         })
     }catch(err){
-        console.log(err._message)
+        console.log('err',err._message)
         return res.send(err)
     }
 }
@@ -24,6 +23,10 @@ export async function homepage(req,res){
 export async function getEdit(req,res){
     const {id} = req.params;
     const video = await videoModel.findById(id)
+    if(!video){
+        return res.status(404).render('edit',{pageTitle:"Video not found"})
+    }
+    // 일단 받아오는 video가 없으면 catch로 넘어가긴 하는거같은데.. -> 아닌걸 아래에서 찾아냄
     return res.render('edit',{
         pageTitle:video.title,
         video
@@ -31,17 +34,12 @@ export async function getEdit(req,res){
 }
 
 export async function postEdit(req,res){
-    try{
         const { id } = req.params;
         const video = await videoModel.findById(id)
-        // 생각해보자 video document가 필요한가? -> 업데이터역시 id에맞는 부분을 가져오고 업데이트하는
-        // find + update인 findByIdAndUpdate가 있다
+        if(!video){
+            return res.status(404).render('edit',{pageTitle:'not found Video'})
+        }
         const {title, description, hashTags} = req.body;
-        
-        // 잊지말자. new Model도 결국 promise를 리턴했었다. 그래서 콜백으로 res를 해줬었고,
-        // 마찬가지다 create도 promise를 리턴했기때문에 await으로 안정적인 response를 해줬고
-        // findByUpdate도 마찬가지. 잊지말자
-
         /*
         중요한건 mongoose도 미들웨어 훅 등 이있다. 이말은 mongoose로 db를 조작하는것이 완성되기 전에
         미들웨어라면 그전에 조작하는 뭔가를 추가할수 있다는거지. 
@@ -51,43 +49,61 @@ export async function postEdit(req,res){
             ,description,
             hashTags:formatHashTags(hashTags)
         })
-        /*
-        우리가 new Model해서 나온 document를 save()하는 거를 create()하나로 퉁치면 편하듯이
-        마찬가지로 원래는 findById로 불러온 document(video)를 video.title = form의 title
-        이런식으로 데이터를 바까주고 save()햇어야하는게 이렇게 편해진거다
-        당연하겠지만 공식문서를 봐야하고. findByIdAndUpdate메서드는 1번째인자로 바꿀 document의 id를 받고
-        2번째 인자로는 업데이트할 부분을 객체로 적어준다.
-        */
-
         return res.redirect(`/videos/${id}`);
-
-    }catch(err){
-        console.log(`not found video`)
-        return res.sed(err)
-    }
+        // 일단 findById로 찾은 video가 없으면 catch로 넘어오긴 한다.
 }
 
-export function search(req,res){
-    return res.send('videos -> search')
+export async function getSearch(req,res){
+    const {title} = req.query
+    if(title){
+        const regexp = new RegExp(title,'gi')
+        const videos = await videoModel.find({title:regexp})
+        /*
+        몽고디비의 강력한 오퍼레이터기능이 있기때문에 가능한거고 원래는
+        find({
+            title:{
+                &regex:reg (new RegExp(pattern))
+            }
+        })
+        */
+        return res.render('search',{pageTitle:'Search',videos})
+    }
+    return res.render('search',{pageTitle:'Search',videos:[]})
+}
+export function postSearch(req,res){
+    // 아직 search 템플릿이 없다(퍼그)
 }
 export async function watch(req,res){
     const {id} = req.params;
-    try{
+    // try{
         const video = await videoModel.findById(id)
-        // video가 없으면 catch쪽으로 잘 넘어가네
+        if(!video){
+            return res.status(404).send('not found video')
+        }
+        /*
+        video가 없으면 catch쪽으로 잘 넘어가네
+        -> 그게아니다 catch로 넘어가는거라면 아래 render를 리턴하는걸 지워도 video가 비어있으니 catch의 send로 넘어가서
+        무한로딩이 뜨면안되는데 뜨는걸보면 find한 데이터가 비어있다고 catch로 넘어가는건 아닌듯.
+        -> 맞네 video는 빈배열인데 video.title을 보내니까 여기서 에러가나서 catch로 넘어가는듯.
+
+        => try catch지운다 이유를 알았으니
+
+        어쨋든 await을 쓰는이상 try catch로 에러를 알아내긴 해야하니 쓰긴해야할듯
+        */
         return res.render("watch",{
             pageTitle:video.title,
             video
         })
-    }catch(err){
-        console.log(`not fount video`)
-        return res.send(err)
-        // 추후 에러페이지 이런거는 알아서 만들기로하자
-        // 따로 템플릿을 만들어서 페이지를 만들어주던지
-    }
+    // }catch(err){
+        // console.log(`not fount video`)
+        // return res.send(err)
+    // }
 }
-export function remove(req,res){
-    return res.send(`videos -> remove`)
+export async function getDelete(req,res){
+    const {id} = req.params
+    console.log('id',id)
+    await videoModel.findByIdAndDelete(id)
+    return res.redirect('/')
 }
 
 export function getUpload(req,res){
@@ -98,6 +114,29 @@ export function getUpload(req,res){
 export async function postUpload(req,res){
     const {title,description,hashTags} = req.body
     try{
+        /*
+        model.create같은 메서드들을 우리들도 만들수있다 뜬금없지만
+        static메서드는 클래스를 인스턴스화 하지않고도 클래스 안에서 호출될수 있는 메서드다
+        schema.static(funName,()=>{
+            return this.find({name})
+        })
+        이런식으로 나만의 스태틱메서드를 만드는거다 그래서 키워드도 static인가?
+
+        -> 공식문서 보면 해당 스키마에서 컴파일된 모델에 -> 정적'클래스'메서드를 추가한다
+        즉 스키마.static이자너? 그 스태틱으로 인해 생성된 모델 녀석들은 내가 입맛대로 생성한
+        funName메서드를 가지고있을건데 개내들은 스태틱클래스 메서드라는거지(정적클래스메서드)
+        */
+
+        /*
+        결국 .create findById이런애들은 다 query middleware다 => 아닌것같다.
+        =>ㅇㅇ 확실히아님 '미들웨어'니까 스키마.pre함수에 적히는 1번째인자에 들어갈거고
+
+        그 this가 뭔지는 내가확인해보자
+        쿼리미들웨어는 내가 mongoose.model() 이나 db.model()를 할때 같이 컴파일 된다
+        (같이 기능적으로 껴진다는소리같은데)
+        근데 그 쿼리미들웨어중에 update나 findOneAndUpdate에서는
+        save()훅이 실행되지 않을거라는데? -> 그러면 save()훅을안쓰는 async방법을 써야혀?
+        */
         await videoModel.create({
             title,
             description,
@@ -106,6 +145,7 @@ export async function postUpload(req,res){
             // 원래는 위에를 hashTags로 변환해서 저장하는데 그걸 몽구스 미들웨어단에서 해서 저장하는형식으로하면
             // 좀더 cool한 방법이겠지? => Video.js에서 미들웨어부분(pre)참조
         })
+
         return res.redirect('/')
     }catch(err){
         console.log(err._message)

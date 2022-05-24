@@ -1,0 +1,8 @@
+extends base
+
+block content  
+    div #{errMsg}
+    form(method="post")
+        input(type="email" required placeholder="your-email" name="email")
+        input(type="password" required placeholder="password" name="password")
+        input(type="submit" value="Login")

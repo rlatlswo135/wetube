@@ -9,6 +9,8 @@ block content
     hr
     div 
         a(href=`${video.id}/edit`) Edit Video &rarr;
+        br
+        a(href=`${video.id}/delete`) Delete Video &rarr;
         //- 절대경로 (/url) =>  반드시 이 경로에 / 상대경로(url) => 현재를 중심으로
         //- 현재 기본라우터가 videos로 되있어서 /id/id/edit이 아니라
         //- videos/id/edit으로 가는것 같다.

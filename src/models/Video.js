@@ -12,7 +12,6 @@ const videoSchema = new mongoose.Schema({
         trim:true,
         uppercase:true
         // String.trim()은 js도 있는거고 양쪽의 공백을 제거해준다
-        // 요리할때 고기 트리밍하는거마냥
     },
     description:String,
     createAt:{type:Date,required:true,default:Date.now},
@@ -31,49 +30,18 @@ const videoSchema = new mongoose.Schema({
     // what is meta data
 })
 
-// 스키마레벨 .pre가 미들웨어인듯? -> 공식문서 봐보자
-// .pre(middlewareType,function)
-// 어쨋든 비동기적으로 움직이니까 2번째에 async함수를 쓰는게 좋을거다
 videoSchema.pre('save',async function(){
-    /*
-    몽구스를 통해 db에 save를 하면('save'이벤트를 썻으니)
-    미들웨어니까 이 함수를 거쳐갈거다
-    그래서 아래의 콘솔로그가 띄워져서 보일거다
-    그리고 document의 this를 참조할수있으니 this는 우리가 save를 하기로한
-    document가 될거다 => 중간에 데이터를 바꿔서 저장할수 있다는거
 
-    근데 왜 document가 나오냐면 save가 document 미들웨어중 한놈이기 때문이야
-    save,remove,updateOne등 공식문서에 보면 document미들웨어의 종류가있다
-    그애들을 쓰면 this가 document를 참조하는거
-    */
-
-    /*
-    몽구스의 신버전부터는 next()를 쓰는대신 (미들웨어니까)
-    promise를 리턴하는 함수를 쓰거나 / async함수를 쓸수있다.
-    */
     this.hashTags = formatHashTags(this.hashTags[0])
-
+    /*
+    근데 pre훅을 이용해서 update를 할때는 업데이트될 document에 접근할수 없을거라는데
+    순서를 잘 생각해보면 당연한 이야기일수도?
+    (미들웨어니까, 미들웨어를 거친 다음에야 최종 저장이 될텐데 미들웨어단에서
+        저장할(업데이트될) document에 어떻게접근을할까? 이런느낌일까?)
+    */
     console.log('we excute save event',this)
-
+    
 })
-/*
-공식문서참조. 몽구스의 미들웨어는 document,model,aggregate,query미들 웨어가 있다
-미들웨어는 스키마레벨에서 지정되며
-
-각 미들웨어 콜백함수는 각각의 this를 참조한다 -> 즉 화살표함수로 2번째 인자콜백을 넣으면
-안될거다 화살표함수의 this랑 일반함수의 this는 다르기때문에
-즉 document 미들웨어의 this는 document를 참조하고
-model미들웨어의 this는 model을 참조하고 ㅇㅋ?
-
-어쨋든 중요한건 4개다 스키마레벨에서 작동한다는거고 각 미들웨어 종류별로
-메서드라고 해야할까.. 그게 다른거지
-디폴트는 몽구스가 document 미들웨어라고 생각할거다 하지만
-쿼리 미들웨어로 셋하고싶으면 {query:true,document:false}이런 옵션을 넣어서 세팅할수있다는거
-아무튼 공식문서를 봐
-
-+몽구스의 미들웨어는 pre / post hooks라고도 불린다
-
-*/
 
 const videoModel = mongoose.model('Video',videoSchema)
 export default videoModel

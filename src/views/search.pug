@@ -1,0 +1,12 @@
+extends base.pug
+include mixins/video
+
+block content
+    form
+        input(type="text" required name="title")
+        input(type="submit" value="Search")
+        //- method가 post면 url에 쿼리로 데이터가안들어가고 req.body로 가겟지?
+        //- 쿼리로 받고싶으니까 get -> default
+    p
+        each info in videos
+            +video(info)
