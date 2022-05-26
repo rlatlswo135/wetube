@@ -1,8 +1,9 @@
 import express from 'express';
 import { homepage,postSearch,getSearch } from '../controllers/videosControllers';
 import { getJoin,postJoin,getLogin,postLogin } from '../controllers/usersControllers';
-const globalRouter = express.Router('/');
 
+
+const globalRouter = express.Router('/');
 
 globalRouter.get('/',homepage)
 

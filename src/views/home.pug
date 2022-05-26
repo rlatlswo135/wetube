@@ -7,14 +7,13 @@ block header
         ul
             li
                 div
-                if user.login
+                if isLogin
                     div
                         a(href="/logout") Logout 
+                        p Heloo #{user.userName}
                 else
                     div
                         a(href="/login") Login
-    if user.login 
-        small Heloo #{user.userName}
 
 block content
     h1 Welcome to Main Page!

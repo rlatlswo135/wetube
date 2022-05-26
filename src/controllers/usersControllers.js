@@ -18,6 +18,7 @@ export async function postJoin(req,res){
     }
 
     const existUser = await userModel.exists({$or:[
+        // 몽고디비가 지원하는 $or 오퍼레이터
         {userName},
         {email}
     ]})
@@ -76,6 +77,31 @@ export async function postLogin(req,res){
     if(!matchPassword){
         return res.status(400).render('login',{pageTitle,errMsg:"password not correct"})
     }
+    console.log('req.session',req.session)
+    req.session.isLogin = true;
+    req.session.user = user;
+    /*
+    브라우저가 home에 최초로왔을때 express-session을 이용해 세션아이디가 담긴
+    쿠키를 셋해주는 미들웨어를 세팅해줬고
+    로그인할때면 브라우저가 세션아이디가 담긴 쿠키를 가지고있을테니
+    세션데이터에 커스텀데이터인 isLogin과 user데이터를 추가한거다
+    그럼 저 2개의 데이터가 있는세션은 로그인이 되어있다는 소리겠지?
+    */
+
+   /*
+    그래 이렇게 로그인상태를만들었으면 우리의 템플릿엔진(pug)에서 req.session에 접근후
+    user데이터를 받을수있어? -> no 
+    하지만 res.locals에서 템플릿엔진이 접근이 가능한데
+    (이 속성을 사용하면 res.render에 쓰는 템플릿에서 접근가능한 변수를 세팅할수있다)
+    템플릿에서 접근할때 res.locals등으로 접근하는게아니라 
+    그냥 locals에 저장된 프로퍼티네임으로 접근이가능하고 모~든템플릿에서 전역적으로
+    접근하게 할수도 있다 (단 미들웨어로써 상위부분에 res.locals를 셋해줘야하지만)
+
+    즉 템플릿에서 이미 import res.locals가 되있는 느낌인거지
+    그래서 템플릿엔진 내 전역적으로 써야할 변수가 있다면 res.locals에 넣고 미들웨어로
+    상위부분에 놓아주면 원하는대로 될거다
+    */
+
     return res.redirect('/')
     /*
     있다면 user의 비번을 가져와서

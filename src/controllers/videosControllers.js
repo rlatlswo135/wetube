@@ -1,17 +1,10 @@
 import videoModel,{formatHashTags} from "../models/Video"
 
-const fakeUser = {
-    userName:'kim',
-    login:true
-}
-
 export async function homepage(req,res){
     try{
         const videos = await videoModel.find({}).sort({createAt:"desc"})
-        console.log(videos)
         return res.render("home",{
             pageTitle:"home",
-            user:fakeUser,
             videos
         })
     }catch(err){

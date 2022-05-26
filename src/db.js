@@ -7,7 +7,6 @@ mongoose.connect('mongodb://127.0.0.1:27017/wetube');
 
 
 const db = mongoose.connection;
-
 //계속 발생하는 이벤트
 db.on("error",(err)=>console.log("DB Error",error))
 
