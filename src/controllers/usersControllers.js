@@ -37,11 +37,6 @@ export async function postJoin(req,res){
         password,
         location
     })
-    /*
-    하지만 password가 db에 저장된모습을 보면 적나라하다. 나름의 보안조치를 취해야함
-    password hash -> bcrypt라는 패키지를 쓸거.
-    rainbow table를 가진 해킹공격을 막아준댄다. -> salt를 쓰게끔 되어있으니까
-    */
     return res.redirect('/')
     /*
     패스워드틀림 / 이메일중복 등으로 계정생싱이 안됬는데도 브라우저는 이 암호를 저장하시겠습니까?
@@ -70,45 +65,15 @@ export async function postLogin(req,res){
     }
     // 2. 비번 맞나 체크
     const matchPassword = await bcrypt.compare(password,user.password)
-    // compare( input , result hash input) (입력값,해쉬함수거친 출력값) -> 이 두개가 맞는건지 확인하는 메서드인듯
-    // 아까 bcrypt.hash쓸때처럼 콜백을받는데 promise와 async를 지원하니까 await을 쓴모습
-    // await을 꼭써야한다. 아니면 비동기동작으로 바로 아래코드가 실행될거고 redirect가 될거니까
-    // bcrypt의 공식문서를 봐보자 
     if(!matchPassword){
         return res.status(400).render('login',{pageTitle,errMsg:"password not correct"})
     }
     console.log('req.session',req.session)
     req.session.isLogin = true;
     req.session.user = user;
-    /*
-    브라우저가 home에 최초로왔을때 express-session을 이용해 세션아이디가 담긴
-    쿠키를 셋해주는 미들웨어를 세팅해줬고
-    로그인할때면 브라우저가 세션아이디가 담긴 쿠키를 가지고있을테니
-    세션데이터에 커스텀데이터인 isLogin과 user데이터를 추가한거다
-    그럼 저 2개의 데이터가 있는세션은 로그인이 되어있다는 소리겠지?
-    */
 
-   /*
-    그래 이렇게 로그인상태를만들었으면 우리의 템플릿엔진(pug)에서 req.session에 접근후
-    user데이터를 받을수있어? -> no 
-    하지만 res.locals에서 템플릿엔진이 접근이 가능한데
-    (이 속성을 사용하면 res.render에 쓰는 템플릿에서 접근가능한 변수를 세팅할수있다)
-    템플릿에서 접근할때 res.locals등으로 접근하는게아니라 
-    그냥 locals에 저장된 프로퍼티네임으로 접근이가능하고 모~든템플릿에서 전역적으로
-    접근하게 할수도 있다 (단 미들웨어로써 상위부분에 res.locals를 셋해줘야하지만)
-
-    즉 템플릿에서 이미 import res.locals가 되있는 느낌인거지
-    그래서 템플릿엔진 내 전역적으로 써야할 변수가 있다면 res.locals에 넣고 미들웨어로
-    상위부분에 놓아주면 원하는대로 될거다
-    */
-
+    //로그인시 세션데이터의 커스텀으로 isLogin,user를 담아줄거다
     return res.redirect('/')
-    /*
-    있다면 user의 비번을 가져와서
-    req.body를 똑같은 해쉬값으로 돌린 값이랑 같으면 login시켜주면 될듯
-    */
-
-    console.log(req.body)
 }
 export function profile(req,res){
     return res.send(`user -> profile`)

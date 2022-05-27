@@ -1,3 +1,12 @@
+// npm run dev는 init.js실행한다 그러니 환경변수 로드는 맨처음에 되어야하니까
+// init.js + 최상단에 불러온거
+// dotenv패키지를 설치하지 않은채로 그냥은 process.env.KEY에 접근이 안된다
+// dotenvsms .env파일에서 process.env로 환경변수를 로드하는 종속성 제로 모듈이란다
+
+// 사용법은 필요한곳마다 require("dotenv"),config()하던지
+// 아예 import해서 쫙 적용하게 해주던지 import 'dotenv' from "dotenv" .config()
+// import "dotenv/config"
+import 'dotenv/config';
 /*
 관련된것들끼리 묶기위해.
 server는 서버와 관련된 로직을.
