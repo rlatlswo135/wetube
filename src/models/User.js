@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema({
     email:{type:String,required:true,unique:true},
     userName:{type:String,required:true,unique:true},
     password:{type:String,required:true},
+    socialLogin:{type:Boolean,default:false},
     location:String
 })
 
@@ -14,10 +15,6 @@ const userSchema = new mongoose.Schema({
 userSchema.pre('save',async function(){
     console.log(`password`,this.password)
     this.password = await bcrypt.hash(this.password,5)
-    // bcrypt의 3번째인자는 콜백을 받는데
-    // 콜백대신 promise / async 를 지원한다 그래서 await이 붙은모습 (async사용)
-    // 2번째인자의 숫자는 해시를 반복할 수다 해쉬된문자를 또해쉬하고 해쉬된문자를 또해쉬하고
-    // 그걸 5번한다고
     console.log(`password`,this.password)
 })
 
