@@ -3,13 +3,13 @@ import bcrypt from "bcrypt"
 import fetch from 'node-fetch'
 
 
-export function getJoin(req,res){
+export const getJoin = function(req,res){
     return res.render('join',{
         pageTitle:'회원 가입',
-        errMsg:""
+        errMsg:" "
     })
 }
-export async function postJoin(req,res){
+export const postJoin = async function(req,res){
     const {userName,email,password,password2,location} = req.body;
     const pageTitle = '회원 가입'
     if(password !== password2){
@@ -53,14 +53,14 @@ export async function postJoin(req,res){
     꽤나 중요한 부분이다(마찬가지로 안됬는데 비번읆 묻는것도 유저경험이 안좋아진다는거지)
     */
 }
-export function getLogin(req,res){
+export const getLogin = function(req,res){
     return res.render('login',{pageTitle:'login',errMsg:""})
 }
-export async function postLogin(req,res){
+export const postLogin = async function(req,res){
     const pageTitle = "login"
     const {email,password} = req.body
     // 1. 이메일 있나 체크
-    const user = await userModel.findOne({email})
+    const user = await userModel.findOne({email,socialLogin:false})
     // 목적에맞게 findOne을 쓰자 find는 배열로담아오고 findOne는 find[0]같은거니까
     if(!user){
         return res.status(400).render('login',{pageTitle,errMsg:"not found user"})
@@ -77,20 +77,65 @@ export async function postLogin(req,res){
     //로그인시 세션데이터의 커스텀으로 isLogin,user를 담아줄거다
     return res.redirect('/')
 }
-export function profile(req,res){
+export const profile = function(req,res){
     return res.send(`user -> profile`)
 }
-export function edit(req,res){
-    return res.send('user -> edit')
+
+export const getEdit = function(req,res){
+    return res.render("edit-profile",{
+        pageTitle:"Edit Profile",
+        errMsg:""
+    })
 }
-export function logout(req,res){
-    return res.send(`user -> logout`)
+
+export const postEdit = async function(req,res){
+    const {user:{_id,userName}} = req.session
+    const {name,location} = req.body;
+    console.log(`name`,name)
+    console.log(`userName`,userName)
+
+    const existUser = await userModel.findOne({userName:name})
+    console.log(`exist`,existUser)
+    // 써봤지만 업데이트된 값을 변수에 넣어주려면 3번째옵션에 new 프로퍼티를 써줘야한다
+
+    //추가로 바꾸려는 닉네임의 중복여부도 체크해봐야할듯.
+    if(existUser){
+        return res.render("edit-profile",{
+            pageTitle:"Edit Profile",
+            errMsg:"exist username"
+        })
+    }
+    const updatedUser = await userModel.findByIdAndUpdate(_id,{
+        userName:name
+        ,location
+    },{
+        new:true
+    })
+    //db의 데이터가 변경되었으니 변경된 내용을 가지고 session.user도 업데이트가 되야한다
+    /*
+    or 변수에 담지않고 그냥 await userModel 해서 update한 후
+    req.session.user = { ...req.session.user , name,locion }으로
+    직접 넣어줄수도
+    */
+
+    console.log(`updateuser`,updatedUser)
+    req.session.user = updatedUser
+    return res.redirect("/")
 }
-export function remove(req,res){
+
+
+export const logout = function(req,res){
+    console.log(req.session)
+    // 세션에 우리 유저정보 + 로그인상태 + 세션아이디가 들어있으니 로그아웃시에는 이 세션데이터를 파괴해야한다
+    // 세션은 연결단위니까 우리의 연결에서만 파괴될거
+    req.session.destroy();
+    return res.redirect('/')
+}
+export const remove = function(req,res){
     return res.send('user -> delete')
 }
 
-export function githubOAuth(req,res){
+export const githubOAuth = function(req,res){
     //step 1
     const baseUrl = 'https://github.com/login/oauth/authorize'
     const queryRecord = {
@@ -101,23 +146,11 @@ export function githubOAuth(req,res){
     const query = new URLSearchParams(queryRecord).toString()
     // 하고 유저인증이 넘어가면 github에 세팅해준 redirect주소로 우리를 리다이렉트시킬꺼다
     return res.redirect(`${baseUrl}?${query}`)
-    /*
-    url의 쿼리문이 url.search란 프로퍼티로 담겨온다
-    URLSearchParams 인터페이스는 URL의 쿼리 문자열에 대해 작업할 수 있는 유틸리티 메서드를 정의합니다.
-     
-    new 생성자를 이용해 URLSearchParams를 만들어 주는거고
-    https://developer.mozilla.org/ko/docs/Web/API/URLSearchParams/URLSearchParams
 
-    문자열 리터럴로 전달 / 배열쌍으로 전달 / record(객체)로 전달
-
-    url.search프로퍼티는 맨앞의 ? 와 함께 url의 쿼리문자열을 나타내는 string이고
-    url.searchParams 메서드를 통해 간편한 쿼리문자열 분석을 지원한다 (mdn)
-    https://developer.mozilla.org/ko/docs/Web/API/URL/search
-    */ 
     
 }
 
-export async function finishGitHubOAuth(req,res){
+export const finishGitHubOAuth = async function(req,res){
     // 요 baseUrl맨앞에 공백(띄워쓰기)가 있으니 현재경로 / 뒤에 https~ 이런식으로와서 에러나옴
     //step 2
     const baseUrl = 'https://github.com/login/oauth/access_token'
@@ -132,11 +165,6 @@ export async function finishGitHubOAuth(req,res){
     */
    const query = new URLSearchParams(queryRecord).toString()
    const finalUrl = `${baseUrl}?${query}`
-
-//근데 fetch API는 WebAPI라 브라우저환경에서 밖에 못쓴다. node환경에서는 못써유
-//즉 같은 Javascriptt라도 기본js는 웹기반이기때문에 node환경이랑은 아예 같지는 않을거다
-// 즉 웹환경에서 쓸수있는것들이 node환경에서는 못쓸수 있다늑너 -> 그래서 node-fetch라는 패키지 설치하고
-// 악시오스도 그런개념 아닐까? -> 어쨋든 이걸로 같은js라도 현재 다른런타임환경에서 개발하고 있다는걸 안다는게중요하다
    const data = await fetch(finalUrl,{
        method:"post",
        headers:{
@@ -146,12 +174,7 @@ export async function finishGitHubOAuth(req,res){
    })
 //fetch자체가 프로미스를 리턴한다 그러니 프로미스ㅔ메서드인 then으로 체이닝하는거고
    const json = await data.json()
-// fetch의 response.body에 요청의 결과가 담겨오고
-// 결과는 readableStream형태다
-// 하지만 JSON포맷으로 변경해주기위해
-// .json메서드를써서 JSON을 입력값으로 사용하고 js객체로 파싱해주는 메서드인것같다
-// 이 자체가 프로미스를 리턴하고 프로미스 풀필드 안에 해당 데이터가 들어있는거같어
-// 그러니가 여기도 await을 써주는거같어
+
 
 //step 3
    if("access_token" in json){
@@ -182,35 +205,88 @@ export async function finishGitHubOAuth(req,res){
         if(!filterEmail){
             return res.redirect('/login')
         }
+        user.email = filterEmail.email
         // 그후 인증된 이메일이 있나 찾은뒤에 그 이메일이 우리 db에 가입된 이메일인지를 본다 -> 있으면 그걸로 로그인시키면되니까
-        const isExistUser = await userModel.findOne({email:filterEmail.email});
-        console.log('isExit',isExistUser)
-        if(isExistUser){
-            // 있으면 그걸로 로그인시켜야하니 세션에 데이터를 넣어주고
-            req.session.isLogin = true;
-            req.session.user = isExistUser;
-            // 그호 홈으로 리다이렉트
-            return res.redirect('/')
-        }else{
-            // 없으면 그 이메일로 회원가입하라고 리다이렉트한다 (대부분의 사이트가 이런 방법을 취하는데 어떻게 로그인시킬건지 방법은 여러가지
-            const createUser = await userModel.create({
-                userName:user.name||'UnKnown',
-                // 만약 소셜로그인에 name이 나의 서비스의 어떤 user의 name과 겹친다면?
-                // name은 unique로 되있어서 오류가나려나?
-                email:filterEmail.email,
-                password:" ",
-                socialLogin:true,
-                location:user.location
-            })
-            // 추후 고민은 소셜로그인하는애들은 password로 로그인시키면안된다
-            // 별도의 소셜로그인 프로퍼티를 만들어뒀으니 password로그인시에는
-            // 그 소셜로그인프로퍼티가 false인애들만 끍어서 그안에 있는애들로만 비밀번호를 검증해야할듯
-            req.session.isLogin = true;
-            req.session.user = createUser;
-            return res.redirect('/')
-        }
-       }
+    }
+    let findUser = await userModel.findOne({email:user.email});
+    if(!findUser){
+        // 없으면 그 이메일로 회원가입하라고 리다이렉트한다 (대부분의 사이트가 이런 방법을 취하는데 어떻게 로그인시킬건지 방법은 여러가지
+        findUser = await userModel.create({
+            userName:user.name||'UnKnown',
+            // 만약 소셜로그인에 name이 나의 서비스의 어떤 user의 name과 겹친다면?
+            // name은 unique로 되있어서 오류가나려나?
+            email:user.email,
+            password:" ",
+            socialLogin:true,
+            location:user.location,
+            avater:user.avatar_url
+        })
+    }
+        // 추후 고민은 소셜로그인하는애들은 password로 로그인시키면안된다
+        // 별도의 소셜로그인 프로퍼티를 만들어뒀으니 password로그인시에는
+        // 그 소셜로그인프로퍼티가 false인애들만 끍어서 그안에 있는애들로만 비밀번호를 검증해야할듯
+        req.session.isLogin = true;
+        req.session.user = findUser;
+        return res.redirect('/')
    }else{
        return res.redirect('/login')
    }
+}
+
+export const getChangePassword = function(req,res){
+    if(req.session.user.socialLogin){
+        return res.redirect('/')
+    }
+    return res.render("change-password",{
+        pageTitle:"Change Password"
+    })
+}
+
+export const postChangePassword = async function(req,res){
+    const {oldSecret,newSecret,newSecretConfirm} = req.body;
+    const {user} = req.session;
+    const pageTitle = "Change Password"
+
+    const oldMatch = await bcrypt.compare(oldSecret,user.password)
+    console.log(`oldMatch`,oldMatch)
+    if(!oldMatch){
+        return res.render("change-password",{
+            pageTitle,
+            errMsg:"old password가 같지 않습니다"
+        })
+    }
+    if(oldSecret === newSecret){
+        return res.render("change-password",{
+            pageTitle,
+            errMsg:"변경하려는 password가 전과 같습니다"
+        })
+    }
+    if(newSecret !== newSecretConfirm){
+        return res.render("change-password",{
+            pageTitle,
+            errMsg:"password Confirm이 다릅니다"
+        })
+    }
+
+    // password가 해쉬로 저장되어야하고 + 로그인할때도 해쉬된 스트링을
+    // compare해서 확인후 로그인하기때문에 필수임
+
+    const currentUser = await userModel.findById(user._id);
+    currentUser.password = newSecret;
+    await currentUser.save();
+    // save시까지 대기
+
+    /*
+    위 아래는 같다 대신. user스키마의 pre미들웨어에서 password를 해쉬값으로 바꿔주는
+    로직이 짜여있기때문에 그걸 이용하기위해 쓴다 save()를 쓰면 pre미들웨어가 작동할테니까
+    */
+
+    // const newSecretHash = await bcrypt.hash(newSecret,5)
+    // await userModel.findByIdAndUpdate(user._id,{
+    //     password:newSecretHash
+    // })
+
+    req.session.destroy();
+
+    return res.redirect('/')
 }

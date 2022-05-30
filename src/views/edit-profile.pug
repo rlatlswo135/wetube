@@ -1,0 +1,18 @@
+extends base.pug
+
+block content
+    p #{errMsg}
+    form(method="POST")
+        input(placeholder="name" type="text" name="name" value=`${user.userName}`)
+        input(placeholder="location" type="text" name="location" value=`${user.location}`)
+        input(type="submit" value="Update Profile")
+        if !user.socialLogin
+            hr
+            a(href="change-password") Change Password &rarr;
+
+            //- social로그인은 패스워드가 없으니 변경을 보여주면 안된다
+
+        //- userRouter안에 있으니 상대경로는 /users/상대경로 로 갈거다
+        //- 얘는 /users/change-password로 갈거다
+
+    //- form의 action속성을 안쓰면 같은 url에 요청한 결과값이 온댔지

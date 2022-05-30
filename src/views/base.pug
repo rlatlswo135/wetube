@@ -10,9 +10,23 @@ html(lang="ko")
                 ul 
                     li
                         a(href="/") Home 
-                        a(style="display:block" href="/join") 회원가입
-                        a(style="display:block" href="/videos/upload") Upload Video
-                        a(style="display:block" href="/search") Search Video
+
+                    li
+                        a(href="/search") Search Video
+                        if isLogin
+                            li
+                                a(href="/videos/upload") Upload Video
+                            li
+                                a(href="/users/edit") Edit Profile
+                            li
+                                a(href="/users/logout") Logout 
+                            p Heloo #{user.userName}
+                        else 
+                            li
+                                a(href="/join") 회원가입
+                            li 
+                                a(href="/login") Login
+
             block header
 
         main 

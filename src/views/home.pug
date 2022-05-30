@@ -2,18 +2,6 @@ extends base.pug
 include mixins/video
 //- 불러온 모오습
 
-block header 
-    nav 
-        ul
-            li
-                div
-                if isLogin
-                    div
-                        a(href="/logout") Logout 
-                        p Heloo #{user.userName}
-                else
-                    div
-                        a(href="/login") Login
 
 block content
     h1 Welcome to Main Page!

@@ -9,6 +9,7 @@ import globalRouter from './routers/globalRouter';
 import usersRouter from './routers/usersRouter';
 import videosRouter from './routers/videosRouter';
 import mongoose from 'mongoose';
+import {localsMiddleWare} from "./middleWares.js"
 
 // db.js파일 자체를 import하는 모습 -> 모듈화가 필요없이 db.js에 적힌건 모두 실행될거
 
@@ -43,19 +44,8 @@ app.use(session({
 // 미들웨어의 순서중요할거다 만약 아래 + 위가 바뀐다면
 // 쿠키에 세션아이디를 넣지도 않았는데 req.session을 참조할테니까
 
-app.use((req,res,next) => {
-    //경로가 없으면 전역적으로 세팅되는 미들웨어인듯
-    const {isLogin,user} = req.session
-    // login시 postLogin쪽에서 req.session에 isLogin으로 넣어준다
-    res.locals.isLogin = Boolean(isLogin)
-    // 템플릿엔진에서 접근가능한 데이터셋인 locals에 세션데이터를 넣어준모습
-
-    if(isLogin){
-        res.locals.user = user;
-    }
-
-    next();
-})
+app.use(localsMiddleWare)
+//경로가 없으면 전역적으로 되는 미들웨어인듯?
 
 app.use('/',globalRouter);
 app.use('/users',usersRouter);
